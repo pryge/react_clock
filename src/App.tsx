@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import './App.scss';
+import { Clock } from './Clock';
 
 type State = {
   hasClock: boolean;
@@ -22,6 +23,8 @@ export class App extends Component<{}, State> {
 
   timerId: number = 0;
 
+  clockNameTimerId: number = 0;
+
   startClock = () => {
     // Clear any existing timer before starting a new one
     if (this.timerId) {
@@ -33,10 +36,7 @@ export class App extends Component<{}, State> {
       const newTime = new Date();
 
       // Update clock name every 3300ms
-      this.setState({
-        clockName: getRandomName(),
-        today: newTime,
-      });
+      this.setState({ today: newTime });
 
       // Log time to console every second and update the displayed time
       if (this.state.hasClock) {
@@ -46,13 +46,14 @@ export class App extends Component<{}, State> {
     }, 1000); // Time update every second
 
     // This timer will update the clock name more accurately every 3300ms
-    window.setInterval(() => {
+    this.clockNameTimerId = window.setInterval(() => {
       this.setState({ clockName: getRandomName() });
     }, 3300); // Update clock name every 3300ms
   };
 
   stopClock = () => {
     clearInterval(this.timerId);
+    clearInterval(this.clockNameTimerId);
   };
 
   handleShowClock = () => {
@@ -99,19 +100,13 @@ export class App extends Component<{}, State> {
   }
 
   render() {
+    const { hasClock, clockName, today } = this.state;
+
     return (
       <div className="App">
         <h1>React Clock</h1>
 
-        {this.state.hasClock && (
-          <div className="Clock">
-            <strong className="Clock__name">{this.state.clockName}</strong>
-            {' time is '}
-            <span className="Clock__time">
-              {this.state.today.toUTCString().slice(-12, -4)}
-            </span>
-          </div>
-        )}
+        {hasClock && <Clock name={clockName} time={today} />}
       </div>
     );
   }
